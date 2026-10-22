@@ -22,8 +22,6 @@
 #
 # DISCLAIMER: For authorized security testing only.
 
-version: "3.8"
-
 services:
   # ── Database ──────────────────────────────────────────────
   db:

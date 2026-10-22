@@ -24,7 +24,7 @@
 
 [![CI](https://github.com/memuratozturk/php2shell-poc/actions/workflows/ci.yml/badge.svg)](https://github.com/memuratozturk/php2shell-poc/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-3776AB.svg?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-3776AB.svg?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Lab%20Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white)](lab/docker-compose.yml)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-lightgrey?style=flat-square)]()
 
@@ -56,7 +56,7 @@ Originally discovered by [Wiz Research](https://www.wiz.io/blog/php2shell-php-rc
 | Path | Chain | Target | Prereq |
 |------|-------|--------|--------|
 | 🔴 Remote RCE (mod_php) | Bug 1 + Bug 2 | WordPress / Drupal / Joomla | None (0-click) |
-| 🔴 Local RCE (8.3.x) | var_destroy UAF | PHP 8.3.0–8.3.35 CLI/Web | Local access |
+| 🔴 Local RCE (8.3.x) | `/proc/self/mem` handler swap | PHP 8.3.0–8.3.35 CLI/Web | Local access |
 | 🟠 Memory Disclosure | Bug 2 standalone | Any PHP app on mod_php | None |
 | 🟡 Backtrace UAF | Bug 3 | PHP 8.5.x mod_php | `.htaccess` deprecation |
 | 🟡 OPcache Confusion | Bug 4 | PHP 8.x with OPcache | OOM precondition |
@@ -102,6 +102,10 @@ python3 exploit/php2shell_exploit.py -u http://target/index.php --shell --target
 ---
 
 ## 💻 Demo Output
+
+> **Note:** The tool outputs below are shown exactly as produced during lab
+> testing. Some status messages appear in Turkish (the author's native
+> language) — e.g., *Hedef* = Target, *Komut* = Command, *calisti* = executed.
 
 ### WordPress RCE (PHP 8.4.26)
 
@@ -173,8 +177,6 @@ Linux php836-lab 6.8.0 #1 SMP x86_64 GNU/Linux
 
 ---
 
----
-
 ## 📸 Screenshots & Evidence
 
 > The images below are rendered directly from the raw transcripts in
@@ -216,7 +218,11 @@ Linux php836-lab 6.8.0 #1 SMP x86_64 GNU/Linux
 
 ```
 php2shell-poc/
-├── README.md                         # You are here
+├── README.md
+├── pyproject.toml                    # Project metadata (zero dependencies)
+├── requirements.txt                  # Dependency manifest (stdlib only)
+├── .github/
+│   └── workflows/ci.yml             # CI: tests + lint + compose validation
 ├── exploit/
 │   ├── php2shell_exploit.py          # Bug 1+2: Remote RCE chain (mod_php)
 │   ├── memdisclosure.py              # Bug 2: Heartbleed-style memory leak
@@ -249,8 +255,11 @@ php2shell-poc/
 │   ├── joomla_rce.txt                # Joomla RCE proof
 │   ├── memdisclosure.txt             # Memory disclosure proof
 │   ├── fpm_vs_modphp.txt             # FPM vs mod_php comparison
-│   └── patched_vs_unpatched.txt      # Patch verification
+│   ├── patched_vs_unpatched.txt      # Patch verification
+│   ├── SHA256SUMS                    # Integrity manifest
+│   └── README.md                     # Evidence scope & limitations
 ├── LICENSE                           # MIT License
+├── SECURITY.md                       # Responsible disclosure policy
 └── .gitignore
 ```
 
@@ -280,7 +289,7 @@ php2shell-poc/
 | PHP Branch | Vulnerable Range | Fixed In | Notes |
 |------------|-----------------|----------|-------|
 | 8.4.x | 8.4.0 – 8.4.26 | **8.4.27** | Primary target, most common |
-| 8.3.x | 8.3.0 – 8.3.35 | **8.3.36** | var_destroy UAF path |
+| 8.3.x | 8.3.0 – 8.3.35 | **8.3.36** | `/proc/self/mem` handler swap path |
 | 8.2.x | 8.2.0 – 8.2.34 | **8.2.35** | Session handler affected |
 | 8.1.x | 8.1.x (all) | **EOL** | No fix, upgrade required |
 | 8.0.x | 8.0.x (all) | **EOL** | No fix, upgrade required |
@@ -413,7 +422,7 @@ python3 tools/scanner.py -u https://target.com --https --timeout 15
 ## 👤 Credits
 
 - **Wiz Research** — Original discovery of the 4-bug chain and responsible disclosure
-- **MuratNoyan-Cybersecu** — Independent reproduction, cross-platform exploit development, 3 CMS verification, scanner & tooling
+- **[@memuratozturk](https://github.com/memuratozturk)** — Independent reproduction, cross-platform exploit development, 3 CMS verification, scanner & tooling
 - **PHP Security Team** — Rapid patching (PHP 8.4.27, 8.3.36, 8.2.35, 8.5.12)
 
 ---
@@ -438,6 +447,6 @@ and accept full responsibility for your actions.
 
 **If this research helped you, consider giving it a ⭐**
 
-Made with 🔬 by security researchers, for security researchers.
+Made with 🔬 by [@memuratozturk](https://github.com/memuratozturk)
 
 </div>

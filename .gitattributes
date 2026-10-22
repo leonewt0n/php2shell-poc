@@ -1,0 +1,12 @@
+# Binary assets — prevent line-ending conversion and diff noise
+*.png binary
+*.bin binary
+*.dump binary
+
+# Shell scripts — always LF
+*.sh text eol=lf
+lab/setup.sh text eol=lf
+
+# Python — auto
+*.py text auto
+*.php text auto
