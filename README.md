@@ -22,6 +22,7 @@
 
 <br>
 
+[![CI](https://github.com/memuratozturk/php2shell-poc/actions/workflows/ci.yml/badge.svg)](https://github.com/memuratozturk/php2shell-poc/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-3776AB.svg?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Lab%20Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white)](lab/docker-compose.yml)
@@ -172,6 +173,45 @@ Linux php836-lab 6.8.0 #1 SMP x86_64 GNU/Linux
 
 ---
 
+---
+
+## 📸 Screenshots & Evidence
+
+> The images below are rendered directly from the raw transcripts in
+> [`evidence/`](evidence/) by [`tools/render_evidence_images.py`](tools/render_evidence_images.py) —
+> what you see is byte-for-byte what's in the text files. Verify integrity with
+> `shasum -a 256 -c evidence/SHA256SUMS` (see [`evidence/README.md`](evidence/README.md)).
+
+### WordPress RCE — PHP 8.4.26 / mod_php (`uid=33(www-data)`)
+
+![WordPress RCE evidence](docs/images/evidence-wordpress_rce.png)
+
+### Memory Disclosure — 4096-byte heap leak via session cookie
+
+![Memory disclosure evidence](docs/images/evidence-memdisclosure.png)
+
+### Drupal & Joomla — same chain, application-agnostic
+
+<img src="docs/images/evidence-drupal_rce.png" width="49%" alt="Drupal RCE evidence"> <img src="docs/images/evidence-joomla_rce.png" width="49%" alt="Joomla RCE evidence">
+
+### Patched vs Unpatched & FPM vs mod_php
+
+<img src="docs/images/evidence-patched_vs_unpatched.png" width="49%" alt="Patched vs unpatched"> <img src="docs/images/evidence-fpm_vs_modphp.png" width="49%" alt="FPM vs mod_php">
+
+### Raw evidence files
+
+| Evidence | File |
+|----------|------|
+| WordPress RCE | [`evidence/wordpress_rce.txt`](evidence/wordpress_rce.txt) |
+| Drupal RCE | [`evidence/drupal_rce.txt`](evidence/drupal_rce.txt) |
+| Joomla RCE | [`evidence/joomla_rce.txt`](evidence/joomla_rce.txt) |
+| Memory disclosure | [`evidence/memdisclosure.txt`](evidence/memdisclosure.txt) |
+| Patched vs unpatched | [`evidence/patched_vs_unpatched.txt`](evidence/patched_vs_unpatched.txt) |
+| FPM vs mod_php | [`evidence/fpm_vs_modphp.txt`](evidence/fpm_vs_modphp.txt) |
+| Integrity manifest | [`evidence/SHA256SUMS`](evidence/SHA256SUMS) |
+
+---
+
 ## 📂 Repository Structure
 
 ```
@@ -180,13 +220,14 @@ php2shell-poc/
 ├── exploit/
 │   ├── php2shell_exploit.py          # Bug 1+2: Remote RCE chain (mod_php)
 │   ├── memdisclosure.py              # Bug 2: Heartbleed-style memory leak
-│   ├── php2shell_836_poc.php         # PHP 8.3.x local RCE (var_destroy UAF)
+│   ├── php2shell_836_poc.php         # PHP 8.3.x local RCE (/proc/self/mem handler swap)
 │   ├── bug3_backtrace_uaf.py         # Bug 3: Fatal-backtrace cross-request UAF
 │   └── bug4_opcache_confusion.py     # Bug 4: OPcache type confusion via OOM
 ├── tools/
 │   ├── scanner.py                    # CVE detection scanner (version + SAPI)
 │   ├── shell_server.py               # Cross-platform reverse shell server
-│   └── calibrate_offsets.py          # nm -> exploit offset calibration
+│   ├── calibrate_offsets.py          # nm -> exploit offset calibration
+│   └── render_evidence_images.py     # evidence/*.txt -> PNG screenshots
 ├── tests/
 │   └── test_units.py                 # Unit tests (python3 -m unittest)
 ├── lab/
@@ -198,6 +239,7 @@ php2shell-poc/
 │   ├── www-bug4/                     # oom.php + opcache_probe.php
 │   └── setup.sh                      # Automated lab bootstrap
 ├── docs/
+│   ├── images/                       # Evidence screenshots (PNG)
 │   ├── TECHNICAL.md                  # Deep technical analysis
 │   ├── PATCHED_VS_UNPATCHED.md       # Patch verification results
 │   └── WIZ_REPRODUCTION.md           # Wiz blog reproduction guide
