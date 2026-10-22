@@ -187,30 +187,40 @@ class TestBug3Classify(unittest.TestCase):
         self.assertEqual(bug3.classify_consumer(404), "other")
 
 
-class TestBug4Probe(unittest.TestCase):
-    BASE = {"enabled": True, "num_cached_scripts": 10,
-            "num_cached_keys": 10, "max_cached_keys": 100,
-            "used_memory": 1000, "free_memory": 2000}
+class TestBug4DataStructures(unittest.TestCase):
+    def test_shm_layout_utilization(self):
+        layout = bug4.SHMLayout(used_memory=800, free_memory=200)
+        self.assertAlmostEqual(layout.utilization, 80.0)
+        self.assertEqual(layout.total_memory, 1000)
 
-    def test_parse_probe(self):
-        import json
-        self.assertEqual(bug4.parse_opcache_probe(
-            json.dumps(self.BASE).encode())["num_cached_scripts"], 10)
-        self.assertIsNone(bug4.parse_opcache_probe(b"<html>ok</html>"))
-        self.assertIsNone(bug4.parse_opcache_probe(b"[1,2]"))
+    def test_shm_layout_zero_mem(self):
+        layout = bug4.SHMLayout()
+        self.assertAlmostEqual(layout.utilization, 0.0)
 
-    def test_analyze_no_anomaly(self):
-        self.assertEqual(bug4.analyze_probe(self.BASE, dict(self.BASE)), [])
+    def test_calibration_result_defaults(self):
+        cal = bug4.CalibrationResult()
+        self.assertEqual(cal.optimal_ml, 0)
+        self.assertFalse(cal.partial_persist_detected)
 
-    def test_analyze_negative_and_key_inversion(self):
-        cur = dict(self.BASE, used_memory=-5,
-                   num_cached_keys=3, num_cached_scripts=9)
-        anomalies = bug4.analyze_probe(self.BASE, cur)
-        self.assertTrue(any("negatif" in a for a in anomalies))
-        self.assertTrue(any("num_cached_keys" in a for a in anomalies))
+    def test_corruption_result_defaults(self):
+        cr = bug4.CorruptionResult()
+        self.assertFalse(cr.corrupted)
 
-    def test_analyze_requires_both(self):
-        self.assertEqual(bug4.analyze_probe(None, self.BASE), [])
+    def test_leak_result_defaults(self):
+        lr = bug4.LeakResult()
+        self.assertFalse(lr.confused)
+        self.assertEqual(lr.chunk_base, 0)
+        self.assertEqual(lr.libphp_base, 0)
+
+    def test_rce_result_defaults(self):
+        rce = bug4.RCEResult()
+        self.assertFalse(rce.success)
+
+    def test_is_user_pointer(self):
+        self.assertTrue(bug4.is_user_pointer(0x7F42F2400000))
+        self.assertTrue(bug4.is_user_pointer(0x7242F2400000))
+        self.assertFalse(bug4.is_user_pointer(0x1234))
+        self.assertFalse(bug4.is_user_pointer(0x0000800000000000))
 
 
 class TestCalibrate(unittest.TestCase):

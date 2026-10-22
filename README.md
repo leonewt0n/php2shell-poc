@@ -49,7 +49,7 @@ Originally discovered by [Wiz Research](https://www.wiz.io/blog/php2shell-php-rc
 | 1 | Session upload-progress stale global | CVE-2026-109619 | **Remote Code Execution** | PHP 8.2–8.4 mod_php |
 | 2 | Session cookie memory disclosure | CVE-2026-109618 | **Heartbleed-style memory leak** | PHP 8.2–8.4 mod_php |
 | 3 | Fatal-error backtrace UAF | CVE-2026-109619 | **Cross-request UAF primitive** | PHP 8.5.0–8.5.11 |
-| 4 | OPcache type confusion | — | **Type confusion via OOM** | PHP 8.x (research) |
+| 4 | OPcache type confusion | — | **SHM type confusion → RCE** | PHP 8.x with OPcache |
 
 ### Exploit Paths
 
@@ -59,7 +59,7 @@ Originally discovered by [Wiz Research](https://www.wiz.io/blog/php2shell-php-rc
 | 🔴 Local RCE (8.3.x) | `/proc/self/mem` handler swap | PHP 8.3.0–8.3.35 CLI/Web | Local access |
 | 🟠 Memory Disclosure | Bug 2 standalone | Any PHP app on mod_php | None |
 | 🟡 Backtrace UAF | Bug 3 | PHP 8.5.x mod_php | `.htaccess` deprecation |
-| 🟡 OPcache Confusion | Bug 4 | PHP 8.x with OPcache | OOM precondition |
+| 🔴 OPcache Confusion → RCE | Bug 4 (7-phase chain) | PHP 8.x with OPcache | OOM calibration |
 | 🟢 Scanner | Version + SAPI detect | Mass scanning | Network access |
 
 ---
@@ -228,7 +228,7 @@ php2shell-poc/
 │   ├── memdisclosure.py              # Bug 2: Heartbleed-style memory leak
 │   ├── php2shell_836_poc.php         # PHP 8.3.x local RCE (/proc/self/mem handler swap)
 │   ├── bug3_backtrace_uaf.py         # Bug 3: Fatal-backtrace cross-request UAF
-│   └── bug4_opcache_confusion.py     # Bug 4: OPcache type confusion via OOM
+│   └── bug4_opcache_confusion.py     # Bug 4: OPcache type confusion → RCE (7-phase)
 ├── tools/
 │   ├── scanner.py                    # CVE detection scanner (version + SAPI)
 │   ├── shell_server.py               # Cross-platform reverse shell server

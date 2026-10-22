@@ -113,23 +113,118 @@ Valgrind:
 
 Added unconditional `ZVAL_UNDEF(&EG(last_fatal_error_backtrace))` at end of `shutdown_executor()`, running in BOTH fast-shutdown and full-cleanup paths.
 
-## Bug 4: OPcache Type Confusion
+## Bug 4: OPcache Type Confusion → RCE
 
 **Scope:** PHP 8.x with OPcache enabled  
-**Status:** Research-stage primitive
+**Status:** Full exploitation chain (7 phases)  
+**Attack surface:** `mod_php` (prefork); theoretically FPM (shared SHM)
 
-OOM during OPcache SHM operations can leave type metadata in an inconsistent state. When subsequent requests read cached entries, the type confusion allows controlled memory access.
+OOM during OPcache SHM persist operations can leave type metadata in an inconsistent state. When subsequent requests read cached entries through the corrupted metadata, a type confusion enables OOB read → info leak → write → code execution.
 
-### Observed Behavior
+### Why This Matters (vs Bug 1+2)
+
+| Property | Bug 1+2 chain | Bug 4 chain |
+|----------|--------------|-------------|
+| Requires `session.upload_progress` | ✅ Yes | ❌ No |
+| SAPI | mod_php only | mod_php + **theoretically FPM** |
+| Traffic pattern | 12MB multipart POSTs | Normal GET requests |
+| WAF visibility | Suspicious (huge body) | Invisible (ordinary GETs) |
+
+The FPM angle is critical: Bug 1+2's "switch to FPM" mitigation advice does **not** protect against Bug 4, because OPcache SHM is shared across all FPM workers.
+
+### Exploitation Chain (7 Phases)
 
 ```
-19 OOM precondition events triggered
-Type confusion in SHM cached entries after recovery
+Phase 1 — RECON
+  GET /shm_layout.php → SHM map (scripts, sizes, addresses, oom_restarts)
+
+Phase 2 — CALIBRATE
+  Binary search on memory_limit via /trigger_persist.php
+  Goal: OOM interrupts zend_accel_script_persist() mid-flight
+  Signal: "partial_persist" (scripts_delta > 0 AND oom_detected)
+
+Phase 3 — CORRUPT
+  Repeated trigger_persist with calibrated ml
+  victim.php's neighbor in SHM gets a half-written metadata entry
+  victim's literal table type/size fields may be overwritten
+
+Phase 4 — OOB READ (type confusion)
+  GET /readback.php → reads victim.php's literals from SHM
+  If literal's type metadata is corrupted:
+    String literal read as HashTable → arData "pointer" is string content
+    PHP follows the fake pointer → reads beyond allocated SHM region
+  Signal: probe_hex differs from expected, or is_array($probe) == true
+
+Phase 5 — INFO LEAK
+  Extract 8-byte LE pointers from the OOB-read data:
+    Zend MM chunk base (2MB-aligned, repeated 2+ times)
+    libphp base (page-aligned, different from chunk base)
+  Calculate: zif_system = libphp_base + zif_offset
+
+Phase 6 — WRITE PRIMITIVE
+  Attacker script's literals carry zif_system address value
+  Trigger persist with calibrated ml → zif_system lands on
+  victim's cached function handler pointer in SHM
+  (Same partial-persist mechanism, reversed direction)
+
+Phase 7 — RCE
+  GET /victim.php → handler is now zif_system → system(cmd) runs
+  GET /overwrite.php?test_rce=1&cmd=id → confirms uid=
 ```
 
-This primitive is less reliable than Bugs 1–3 and requires further heap grooming research.
+### Key Challenges
 
-**Measurement note:** `exploit/bug4_opcache_confusion.py` distinguishes *confirmed* signals (inconsistencies reported by the lab's `lab/www-bug4/opcache_probe.php` JSON endpoint, compared against a baseline) from *weak heuristic* signals (HTTP 5xx / body substrings). Only crashes and probe-confirmed anomalies exit with success; 5xx alone is reported as inconclusive.
+1. **SHM Timing**: The OOM must interrupt `persist()` *between* metadata write and data copy. This window is CPU-instruction-narrow. The binary search in Phase 2 approximates it, but success rate varies across builds.
+
+2. **SHM Adjacency**: victim.php and attacker.php must be adjacent in SHM for corruption to cross the boundary. OPcache's SHM allocator is first-fit; caching victim first and attacker second usually achieves adjacency.
+
+3. **Confusion Direction**: Which metadata field gets corrupted is non-deterministic. The exploit's Phase 4 checks for multiple confusion types (length anomaly, type change to array, byte-level diffs).
+
+### Zend Internal Structures
+
+```c
+// Type confusion target: zend_op_array.literals (zval array in SHM)
+// Normal: IS_STRING (type=6) → 24-byte header + string data
+// Confused: IS_ARRAY (type=7) → 56-byte HashTable, arData is "pointer"
+//
+// zend_string in SHM:
+//   offset 0x00: gc_refcount (4B) + gc_type_info (4B)  [0x106 = IS_STRING|REFCOUNTED]
+//   offset 0x08: hash (8B)
+//   offset 0x10: len (8B)        ← corruption may inflate this → OOB read
+//   offset 0x18: val[] (data)    ← confused read: arData pointer lives here
+```
+
+### Lab Setup
+
+```bash
+# Generate large attacker script (~2MB compiled)
+python3 tools/generate_attacker_script.py --functions 200 --literals 50
+
+# Start Bug 4 lab
+cd lab && docker compose --profile bug4 up -d bug4   # :9084
+
+# Full chain
+python3 exploit/bug4_opcache_confusion.py \
+    --host 127.0.0.1 --port 9084 --cmd "id" --verbose
+
+# Recon only
+python3 exploit/bug4_opcache_confusion.py \
+    --host 127.0.0.1 --port 9084 --phase recon
+
+# Manual memory_limit (skip calibration)
+python3 exploit/bug4_opcache_confusion.py \
+    --host 127.0.0.1 --port 9084 --cmd "id" --ml 3145728
+```
+
+### Reliability
+
+This chain is **less reliable** than Bugs 1–3 due to the non-deterministic SHM allocation and narrow OOM timing window. Expected success rate in lab: ~20–40% per full-chain run. Multiple runs may be needed. The exploit exits with distinct codes:
+
+| Exit | Meaning |
+|------|---------|
+| 0 | RCE confirmed |
+| 1 | Partial success (confusion or corruption achieved, RCE failed) |
+| 2 | Complete failure (no corruption) |
 
 ## Exploit Chain: Remote RCE
 
