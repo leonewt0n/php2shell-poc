@@ -8,18 +8,10 @@
  * ve SHM'de partial metadata kalir.
  *
  * Buyukluk hedefi: ~1-2MB derlenmis opcode + literal tablosu.
- * Exploit bunu trigger_persist.php uzerinden cache'lemeye calisir.
+ * Gercek buyuk versiyonu tools/generate_attacker_script.py ile uretin.
  *
  * SADECE LAB.
  */
-
-// ---- 200 fonksiyon, her biri 50 string literal ----
-// Her fonksiyon ~10KB SHM tuketir; toplam ~2MB
-// OPcache persist() bu literal'leri SHM'e kopyalarken OOM olabilir
-
-<?php
-// Generate heavy literal content for OPcache
-// Each function contains many string constants that OPcache must persist
 
 function atk_fn_0() {
     $a = array();
@@ -37,5 +29,4 @@ function atk_fn_0() {
 }
 
 // Bu dosya calistirilmaz; sadece opcache_compile_file() ile persist edilir.
-// Gercek attacker.php, tools/generate_attacker_script.py ile uretilir.
 echo "This script should only be compiled, not executed.\n";
