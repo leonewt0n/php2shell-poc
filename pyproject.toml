@@ -1,0 +1,16 @@
+[project]
+name = "php2shell"
+version = "2.1.0"
+description = "PHP2Shell (CVE-2026-109618 / CVE-2026-109619) arastirma ve exploit araclari - yalnizca yetkili test"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+# Bilincli olarak sifir bagimlilik: tum araclar yalnizca Python stdlib kullanir.
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+
+[tool.php2shell]
+# Offset'ler build'e ozeldir; tools/calibrate_offsets.py ile kalibre edin.
+calibrated_build = "php:8.4.26-apache (Debian, mod_php)"

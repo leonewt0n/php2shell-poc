@@ -1,0 +1,15 @@
+# PHP2Shell - Bug 4 Lab (PHP 8.4.26, OPcache acik)
+#
+# Build (repo kokunden):
+#   docker build -t php2shell-bug4 -f lab/Dockerfile.bug4 .
+# veya compose profiliyle:
+#   cd lab && docker compose --profile bug4 up -d bug4   # :9084
+#
+# DISCLAIMER: For authorized security testing only.
+FROM php:8.4.26-apache
+
+RUN docker-php-ext-install opcache \
+ && printf 'memory_limit=16M\nopcache.enable=1\nopcache.enable_cli=0\n' \
+      > /usr/local/etc/php/conf.d/bug4.ini
+
+COPY lab/www-bug4/ /var/www/html/

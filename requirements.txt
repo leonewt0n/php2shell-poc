@@ -1,0 +1,2 @@
+# PHP2Shell araclari yalnizca Python standart kutuphanesini kullanir.
+# Harici bagimlilik yoktur; bu dosya araclar (pip/venv) uyumlulugu icin vardir.

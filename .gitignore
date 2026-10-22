@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Logs & dumps
+*.log
+*.bin
+*.dump
+shell_output.txt
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Docker volumes
+lab/proof/
+db_data/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Debug artifacts (moved to _debug/)
+_debug/

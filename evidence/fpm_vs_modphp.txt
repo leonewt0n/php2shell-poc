@@ -1,0 +1,44 @@
+============================================================
+ PHP2Shell - FPM vs mod_php Comparison
+ Date: 22 October 2026
+ PHP: 8.4.26
+============================================================
+
+HYPOTHESIS:
+  The exploit chain requires persistent process state between
+  HTTP requests (stale session globals). mod_php (mpm_prefork)
+  keeps the same worker process alive across requests, while
+  PHP-FPM spawns/recycles workers with clean state.
+
+TEST MATRIX:
+  ┌──────────┬───────────────┬─────────────┐
+  │ SAPI     │ Heap Leak     │ RCE         │
+  ├──────────┼───────────────┼─────────────┤
+  │ mod_php  │ ✅ 4096 bytes │ ✅ uid=33   │
+  │ FPM      │ ❌ 0/10       │ ❌ 0/10     │
+  └──────────┴───────────────┴─────────────┘
+
+mod_php RESULTS (10/10 successful):
+  Attempt  1: [+] Zend MM chunk base = 0x7242f2400000 -> RCE OK
+  Attempt  2: [+] Zend MM chunk base = 0x7242f2400000 -> RCE OK
+  Attempt  3: [+] Zend MM chunk base = 0x7242f2400000 -> RCE OK
+  ...
+  Attempt 10: [+] Zend MM chunk base = 0x7242f2400000 -> RCE OK
+
+  PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+
+PHP-FPM RESULTS (0/10 successful):
+  Attempt  1: [-] Heap leak basarisiz
+  Attempt  2: [-] Heap leak basarisiz
+  Attempt  3: [-] Heap leak basarisiz
+  ...
+  Attempt 10: [-] Heap leak basarisiz
+
+  PROOF: None (exploit chain cannot start)
+
+CONCLUSION:
+  - mod_php (Apache mpm_prefork): VULNERABLE - worker process
+    survives fatal errors and retains stale globals.
+  - PHP-FPM: NOT EXPLOITABLE - each request gets a clean
+    process state, stale references cannot persist.
+  - Switching from mod_php to PHP-FPM is a complete mitigation.

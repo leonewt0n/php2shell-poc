@@ -1,0 +1,29 @@
+# PHP2Shell - PHP 8.3.6 Isolated Lab
+# For testing the /proc/self/mem handler-overwrite PoC
+# (exploit/php2shell_836_poc.php; PHP kodu calistirabilme onkosulludur)
+#
+# Build & Run (REPO KOKUNDEN calistirin; context exploit/ icermeli):
+#   docker build -t php836-lab -f lab/Dockerfile.836 .
+#   docker run --rm -it --name php836-lab php836-lab
+# (lab/setup.sh "836" alt komutu da dogru context ile bunu yapar.)
+#
+# Then inside the container:
+#   php /tmp/php2shell_836_poc.php "id"
+#
+# NOT: /proc/self/mem erisimi host kernel'inin ptrace_scope'una baglidir;
+# container icinden sysctl degistirilemez, gerekirse host'ta ayarlayin.
+#
+# DISCLAIMER: For authorized security testing only.
+
+FROM php:8.3.6-cli
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        procps \
+        strace \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY exploit/php2shell_836_poc.php /tmp/php2shell_836_poc.php
+
+WORKDIR /tmp
+
+CMD ["bash", "-c", "echo '[*] PHP 8.3.6 lab ready. Run: php /tmp/php2shell_836_poc.php \"id\"' && bash"]

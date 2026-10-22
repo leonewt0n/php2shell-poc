@@ -1,0 +1,4 @@
+# Bug 3 tetikleyicisi: auto_detect_line_endings PHP 8.5'te deprecated.
+# Apache bu php_value'yu php_request_startup/init_executor ONCESI uygular;
+# deprecation, EG(last_fatal_error_backtrace)'e zval_ptr_dtor cagirir.
+php_value auto_detect_line_endings 1

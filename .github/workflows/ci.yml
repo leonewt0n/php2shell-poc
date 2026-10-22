@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Python sozdizimi kontrolu
+        run: python3 -m compileall -q exploit tools tests
+
+      - name: Birim testler
+        run: python3 -m unittest discover -s tests -v
+
+      - name: PHP kur
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+
+      - name: PHP sozdizimi kontrolu
+        run: |
+          php -l exploit/php2shell_836_poc.php
+          for f in lab/www-bug3/*.php lab/www-bug4/*.php; do php -l "$f"; done
+
+      - name: Shell sozdizimi kontrolu
+        run: bash -n lab/setup.sh
+
+      - name: Compose dogrulama
+        run: docker compose -f lab/docker-compose.yml config -q
