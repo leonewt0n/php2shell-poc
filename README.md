@@ -233,7 +233,8 @@ php2shell-poc/
 │   ├── scanner.py                    # CVE detection scanner (version + SAPI)
 │   ├── shell_server.py               # Cross-platform reverse shell server
 │   ├── calibrate_offsets.py          # nm -> exploit offset calibration
-│   └── render_evidence_images.py     # evidence/*.txt -> PNG screenshots
+│   ├── render_evidence_images.py     # evidence/*.txt -> PNG screenshots
+│   └── generate_attacker_script.py   # Bug 4: OOM trigger PHP generator
 ├── tests/
 │   └── test_units.py                 # Unit tests (python3 -m unittest)
 ├── lab/
