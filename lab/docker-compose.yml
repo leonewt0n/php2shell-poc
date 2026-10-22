@@ -53,7 +53,7 @@ services:
 
   # ── Joomla (PHP 8.4 mod_php) ─────────────────────────────
   joomla:
-    image: joomla:5-php8.4-apache
+    image: joomla:6-php8.4-apache
     ports:
       - "9082:80"
     environment:
