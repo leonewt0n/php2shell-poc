@@ -68,7 +68,7 @@ Originally discovered by [Wiz Research](https://www.wiz.io/blog/php2shell-php-rc
 ### 1. Spin Up the Lab (30 seconds)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/php2shell-poc.git
+git clone https://github.com/memuratozturk/php2shell-poc.git
 cd php2shell-poc/lab
 docker-compose up -d
 ```
