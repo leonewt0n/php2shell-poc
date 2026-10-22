@@ -1,26 +1,11 @@
-# PHP2Shell - Vulnerability Lab
-# Starts WordPress + Drupal + Joomla on vulnerable PHP 8.4.26 (mod_php)
+# Lab: WordPress + Drupal + Joomla (PHP 8.4.26 mod_php)
 #
-# Usage:
-#   docker-compose up -d        # Start all services
-#   docker-compose logs -f      # Watch logs
-#   docker-compose down -v      # Teardown
+# docker-compose up -d
 #
-# Ports:
-#   WordPress : http://127.0.0.1:9080
-#   Drupal    : http://127.0.0.1:9081
-#   Joomla    : http://127.0.0.1:9082
-#   Bug 3     : http://127.0.0.1:9083  (profile: bug3, PHP 8.5.11)
-#   Bug 4     : http://127.0.0.1:9084  (profile: bug4, PHP 8.4.26+OPcache)
+# :9080 WordPress, :9081 Drupal, :9082 Joomla
+# :9083 Bug3 (--profile bug3), :9084 Bug4 (--profile bug4)
 #
-# ONEMLI - SURUM DOGRULAMA: Resmi CMS imajlari ayni etikette yeniden
-# insa edildikce PHP patch seviyesi kayabilir (or. 8.4.26 -> 8.4.27).
-# Testten once mutlaka dogrulayin:
-#   docker compose exec wordpress php -r 'echo PHP_VERSION;'
-# Beklenen: 8.4.26. Farkliysa sonuc "patched" davranisi gosterir;
-# imaji digest ile sabitleyin (docker inspect --format='{{index .RepoDigests 0}}').
-#
-# DISCLAIMER: For authorized security testing only.
+# Surum kontrolu: docker compose exec wordpress php -r 'echo PHP_VERSION;'
 
 services:
   # ── Database ──────────────────────────────────────────────

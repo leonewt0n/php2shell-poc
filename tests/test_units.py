@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""PHP2Shell birim testleri (stdlib unittest, ag erisimi yok).
-
-Calistirma: python3 -m unittest discover -s tests -v
-"""
+# Birim testler — python3 -m unittest discover -s tests -v
 import importlib.util
 import os
 import struct

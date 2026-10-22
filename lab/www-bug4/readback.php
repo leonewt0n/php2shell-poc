@@ -1,18 +1,6 @@
 <?php
-/**
- * Bug 4 Lab: OOB Read Surface
- *
- * Bu script, victim.php'nin SHM'deki literal'lerini dogrudan okur.
- * Normal durumda: bilinen degerler doner.
- * Type confusion sonrasi: literal'in boyutu/tipi bozulmus olabilir
- * ve PHP, SHM sinirinin otesini okur → bilgi sizdirma (info leak).
- *
- * ?offset=N  ile literal tablosundaki N. literal'i okur.
- * ?raw=1     ile ham binary (base64) doner.
- *
- * Exploit'in Phase 4 (OOB Read) asamasinda kullanilir.
- * SADECE LAB.
- */
+// victim.php'nin literal'lerini SHM'den okur.
+// Type confusion varsa boyut/tip bozuk → OOB read → info leak.
 header('Content-Type: application/json');
 
 $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;

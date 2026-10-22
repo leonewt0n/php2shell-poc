@@ -1,13 +1,5 @@
 <?php
-/**
- * Bug 4 Lab: OPcache SHM Layout Dump
- *
- * Cached script'lerin SHM adreslerini, boyutlarini, literal tablolarini
- * ve metadata'larini JSON olarak doner. Exploit'in Phase 1 (Recon)
- * asamasinda kullanilir.
- *
- * SADECE LAB: Uretimde opcache_get_status(true) bilgi ifsasidir.
- */
+// OPcache SHM layout dump — recon icin (Phase 1)
 header('Content-Type: application/json');
 
 if (!function_exists('opcache_get_status')) {

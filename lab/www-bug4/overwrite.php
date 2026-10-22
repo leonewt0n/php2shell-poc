@@ -1,29 +1,6 @@
 <?php
-/**
- * Bug 4 Lab: Write Primitive Surface
- *
- * Type confusion sonrasi, victim script'in bir literal'i
- * bozuk tip ile okunursa, PHP onu HashTable sanip arData
- * "pointer"ini takip eder. Ayni mekanizmayla, SHM'deki bir
- * fonksiyonun handler pointer'ini overwrite edebiliriz.
- *
- * Bu script:
- *  1. ?func=<name> ile belirtilen cached fonksiyonun handler adresini okur
- *  2. ?write_addr=0x...&write_val=0x... ile SHM'e yazma dener
- *     (yalnizca type confusion uzerinden, dogrudan degil)
- *  3. Sonucu JSON doner
- *
- * Exploit'in Phase 6 (OOB Write) asamasinda kullanilir.
- *
- * NOT: Dogrudan SHM'e yazma PHP userland'den yapilamaz.
- * Bu script, write primitive'in *okunan tarafi* — exploit,
- * confusion uzerinden controlled veriyi SHM'e yerlestirmek icin
- * trigger_persist.php araciligiyla attacker script'in literal'lerini
- * kullanir. Bu script yalnizca yazmanin basarili olup olmadigini
- * dogrulama amacidir (handler pointer'i degisti mi?).
- *
- * SADECE LAB.
- */
+// Write dogrulama: victim'in handler'i ezildiyse ?test_rce=1&cmd=id ile RCE.
+// Gercek yazma trigger_persist.php uzerinden attacker literal'leriyle yapilir.
 header('Content-Type: application/json');
 
 $result = [

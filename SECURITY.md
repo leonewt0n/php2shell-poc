@@ -1,37 +1,24 @@
-# Security Policy
+# Guvenlik Politikasi
 
-## Scope
+## Kapsam
 
-This repository is a **security research proof-of-concept** for
-CVE-2026-109618 and CVE-2026-109619. The vulnerabilities described here
-affect **PHP itself**, not this repository's code.
+Bu repo CVE-2026-109618 / CVE-2026-109619 icin PoC'dir. Zafiyetler PHP'yi
+etkiler, bu kodlari degil.
 
-## Reporting Vulnerabilities in PHP
+## PHP'deki Zafiyetleri Bildirin
 
-If you discover a security issue in PHP, report it to the PHP Security
-Team through their official process:
+PHP Security Team'e iletin: <https://www.php.net/security>  
+E-posta: security@php.net
 
-- **PHP Security Reporting:** <https://www.php.net/security>
-- **Email:** security@php.net
+PHP zafiyetleri icin public GitHub issue acmayin.
 
-Do **not** open a public GitHub issue for PHP vulnerabilities.
+## Bu Repo Hatalari
 
-## Reporting Issues in This Repository
+Exploit/scanner/lab'da hata bulursaniz [GitHub Issue](https://github.com/memuratozturk/php2shell-poc/issues) acin.
 
-If you find a bug in the exploit code, scanner, or lab setup that causes
-unintended behavior (e.g., data loss, accidental network exposure), please
-open a [GitHub Issue](https://github.com/memuratozturk/php2shell-poc/issues).
+## Desteklenen Surumler
 
-## Responsible Use
-
-This toolkit is provided for **authorized security testing** and
-**educational purposes only**. Usage against systems without explicit
-written permission is illegal and unethical. See the
-[Disclaimer](README.md#%EF%B8%8F-disclaimer) in the README.
-
-## Supported Versions
-
-| Version | Supported |
-|---------|-----------|
-| v1.x    | ✅        |
-| < v1.0  | ❌        |
+| Surum   | Destekleniyor |
+|---------|---------------|
+| v1.x    | Evet          |
+| < v1.0  | Hayir         |

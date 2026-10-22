@@ -1,17 +1,8 @@
 #!/usr/bin/env python3
 """
-Bug 4 Lab: Buyuk PHP script ureteci (OPcache persist() OOM tetikleyici).
+Buyuk PHP dosyasi uretir — OPcache persist() sirasinda OOM tetikler.
 
-OPcache, bu script'i SHM'e persist ederken yuksek bellek tuketir.
-memory_limit ince ayarlandiginda persist() ortasinda OOM olur
-ve victim script'in komsusundaki SHM metadata'si bozulur.
-
-Kullanim:
-  python3 tools/generate_attacker_script.py --functions 200 --literals 50 \
-      --literal-size 200 --output lab/www-bug4/attacker.php
-
-Uretilen dosya ~2MB (derlenmis opcode + literal tablosu):
-  200 fonksiyon × 50 literal × ~220 byte = ~2.2MB SHM
+    python3 generate_attacker_script.py --functions 200 --literals 50 -o lab/www-bug4/attacker.php
 """
 from __future__ import annotations
 import argparse

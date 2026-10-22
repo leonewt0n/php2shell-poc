@@ -1,16 +1,6 @@
 <?php
-/**
- * Bug 4 Lab: Victim Script (OPcache'de cache'lenir)
- *
- * Bu script, SHM'de bilinen literal degerlerle cache'lenir.
- * Type confusion sonrasi literal'in tipi/boyutu bozulursa,
- * okuma OOB (out-of-bounds) olur ve komsudaki SHM verisini sizdirir.
- *
- * Exploit, bu script'i calistirarak confused literal uzerinden
- * SHM icindeki pointer'lari okur (Phase 4: OOB Read).
- *
- * SADECE LAB.
- */
+// OPcache SHM'de bilinen literal'lerle cache'lenir.
+// Type confusion olursa $probe'un tipi/boyutu bozulur → OOB read.
 
 // ---- Kontrol edilebilir literal'ler ----
 // Bu string'ler OPcache SHM'de art arda saklanir.

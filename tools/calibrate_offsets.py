@@ -1,30 +1,12 @@
 #!/usr/bin/env python3
 """
-PHP2Shell - Offset Kalibrasyon Araci
-=====================================
+nm ciktisini parse edip exploit offset'lerini cikarir (zif_system, zval_ptr_dtor).
 
-Exploit'in gomulu offset'leri (LINUX_ZIF_OFFSET / LINUX_DTOR_OFFSET)
-yalnizca kalibre edildikleri build icin gecerlidir (or. Debian
-php:8.4.26-apache). Farkli bir libphp.so / php ikilisi icin bu aracla
-dogru offset'leri uretin:
+    nm -D /usr/lib/apache2/modules/libphp.so > nm.txt
+    python3 calibrate_offsets.py --nm nm.txt
+    python3 calibrate_offsets.py --binary /path/to/libphp.so
 
-  # Hedef sistemde:
-  nm -D /usr/lib/apache2/modules/libphp.so > nm_cikti.txt       # Linux
-  nm /usr/bin/php > nm_cikti.txt                                # CLI ikilisi
-
-  # Bu arac:
-  python3 tools/calibrate_offsets.py --nm nm_cikti.txt
-  python3 tools/calibrate_offsets.py --binary /path/to/libphp.so   # nm cagirir
-  python3 tools/calibrate_offsets.py --nm nm_cikti.txt --json
-
-Cikti, php2shell_exploit.py'ye yapistirilabilir sabitler ve
---zif-offset / --dtor-offset komut satiri biciminde verilir.
-
-NOT: HTDATA_OFFSET heap yerlesimine baglidir; nm ile turetilemez.
-Heap profili/grooming kalibrasyonu gerekir (varsayilan 0x690D8,
---htdata-offset ile ozellestirilir).
-
-Kullanim yalnizca yetkili test ortamlari icindir.
+HTDATA heap'e baglidir, nm'den cikarilamaz (varsayilan: 0x690D8).
 """
 from __future__ import annotations
 

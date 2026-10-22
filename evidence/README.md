@@ -1,22 +1,11 @@
-# Kanıt Dosyaları — Bütünlük ve Kapsam Notu
+# Kanit Dosyalari
 
-Bu dizindeki dosyalar, 22 Ekim 2026 tarihli lab çalıştırmalarının
-**metin transkriptleridir**. Bütünlük doğrulaması:
+22 Ekim 2026 lab calistirmalarindan metin transkriptleri.
 
-```bash
-cd evidence && shasum -a 256 -c SHA256SUMS
-```
+Dogrulama: `shasum -a 256 -c evidence/SHA256SUMS`
 
-## Bilinen sınırlamalar (dürüstlük notu)
+## Sınırlamalar
 
-- Transkriptler ham artefakt değildir: `*.bin` bellek dökümleri,
-  pcap kayıtları, Valgrind/ASAN raporları ve PHP build hash'leri
-  bu repoya **dahil edilmemiştir** (`.gitignore` `*.bin`/`*.log`
-  dosyalarını dışlar).
-- Aynı adreslerin birden çok transkriptte tekrarı, çalıştırmaların
-  aynı lab oturumundan alınmış olmasından kaynaklanabilir; bağımsız
-  tekrar için lab'ı ayağa kaldırıp çalıştırmayı kendiniz yapın
-  (`docs/WIZ_REPRODUCTION.md`).
-- Yeni bir çalıştırmanın çıktısını eklerken: PHP sürümünü
-  (`php -v`), imaj digest'ini ve tarihi transkriptin başına yazın
-  ve `SHA256SUMS` dosyasını yeniden üretin.
+- `*.bin`/`*.log` gibi ham dump'lar repoda yok (gitignore)
+- Ayni adresler tekrar ediyorsa: ayni lab session'dan
+- Yeni kanit eklerken: PHP surumu + imaj digest + tarih yaz, SHA256SUMS guncelle

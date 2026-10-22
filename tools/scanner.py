@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """
-PHP2Shell Scanner - CVE-2026-109618 & CVE-2026-109619 Detection
-Hedef sistemleri tarar ve zafiyeti tespit eder.
+CVE-2026-109618/109619 scanner — PHP surum + SAPI parmak izi
 
-Kullanım:
-    python3 scanner.py --targets targets.csv
-    python3 scanner.py --url http://target.com
-    python3 scanner.py --ip 192.168.1.1
+    python3 scanner.py -u http://target.com
+    python3 scanner.py -t targets.txt -o results.csv
 """
 
 import argparse

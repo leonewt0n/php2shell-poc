@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 """
-PHP2Shell - Kanit Transkriptlerini Terminal Ekran Goruntusune Cevir
-==================================================================
+evidence/*.txt → docs/images/evidence-*.png (terminal goruntuleri)
 
-evidence/*.txt dosyalarini koyu temali, terminal penceresi gorunumlu
-PNG'lere donusturur (docs/images/evidence-*.png). Boylece README'deki
-"ekran goruntuleri" her zaman repodaki gercek kanit metniyle birebir
-ayni kalir; calistirma tekrar edilirse ayni komutla yenilenir:
+    python3 render_evidence_images.py
 
-    python3 tools/render_evidence_images.py
-
-Gereksinim: Pillow (pip install pillow). Aracin kendisi icin degil,
-yalnizca bu gorsellestirme icin gerekir.
+Gereksinim: pillow
 """
 from __future__ import annotations
 
