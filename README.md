@@ -405,7 +405,7 @@ python3 tools/scanner.py -u https://target.com --https --timeout 15
 | PHP Advisory | [PHP Security Advisory (Oct 2026)](https://www.php.net/security) |
 | CVE-2026-109618 | [NVD Entry](https://nvd.nist.gov/vuln/detail/CVE-2026-109618) |
 | CVE-2026-109619 | [NVD Entry](https://nvd.nist.gov/vuln/detail/CVE-2026-109619) |
-| GHSA-6wmf-4rv5-p3rp | [GitHub Security Advisory](https://github.com/advisories/GHSA-6wmf-4rv5-p3rp) |
+| GHSA-6wmf-4rv5-p3rp | [GitHub Security Advisory](https://github.com/advisories) *(advisory pending publication)* |
 | Calif Research | [Independent Reproduction](https://calif.io/) |
 
 ---

@@ -224,4 +224,4 @@ The `php2shell_836_poc.php` exploit uses a different approach — no session bug
 - [Wiz Research: PHP2Shell](https://www.wiz.io/blog/php2shell-php-rce)
 - [PHP Internals: Session Upload Progress](https://www.php.net/manual/en/session.upload-progress.php)
 - [Zend MM Allocator Internals](https://www.phpinternalsbook.com/php7/memory_management/zend_memory_manager.html)
-- [GHSA-6wmf-4rv5-p3rp](https://github.com/advisories/GHSA-6wmf-4rv5-p3rp)
+- [GHSA-6wmf-4rv5-p3rp](https://github.com/advisories) *(advisory pending publication)*
